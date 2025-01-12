@@ -43,8 +43,9 @@ export default function Home() {
       return lines
         .filter(line => regex.test(line))
         .join('\n');
-    } catch (e) {
+    } catch (error) {
       // Caso a regex seja inválida, volta para busca normal
+      console.error(error);
       return lines
         .filter(line => line.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
         .join('\n');
