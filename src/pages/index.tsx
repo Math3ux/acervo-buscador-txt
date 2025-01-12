@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { debounce } from 'lodash';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +16,8 @@ const geistMono = Geist_Mono({
 export default function Home() {
   const [fileContent, setFileContent] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [lines, setLines] = useState<string[]>([]);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,16 +32,31 @@ export default function Home() {
     // Ler o conteúdo do arquivo
     const text = await file.text();
     setFileContent(text);
+    setLines(text.split('\n')); 
   };
 
-  const getFilteredContent = () => {
-    if (!searchTerm) return fileContent;
+  const getFilteredContent = useMemo(() => {
+    if (!debouncedSearchTerm) return fileContent;
     
-    return fileContent
-      .split('\n')
-      .filter(line => line.toLowerCase().includes(searchTerm.toLowerCase()))
-      .join('\n');
-  };
+    try {
+      const regex = new RegExp(debouncedSearchTerm, 'i');
+      return lines
+        .filter(line => regex.test(line))
+        .join('\n');
+    } catch (e) {
+      // Caso a regex seja inválida, volta para busca normal
+      return lines
+        .filter(line => line.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+        .join('\n');
+    }
+  }, [debouncedSearchTerm, lines, fileContent]);
+
+  const debouncedSearch = useCallback(
+    debounce((term: string) => {
+      setDebouncedSearchTerm(term);
+    }, 300),
+    []
+  );
 
 
   return (
@@ -47,12 +65,12 @@ export default function Home() {
         <h1 className="text-2xl font-bold mb-4 mt-8 text-center">Acervo</h1>
       </div>
       <div className="mb-4">
-        <div className="align-middle">
+        <div className="align-middle top-24 w-full flex justify-center z-10">
         <input
           type="file"
           accept=".txt"
           onChange={handleFileChange}
-          className="block w-full text-sm text-gray-500
+          className="block w-64 text-sm text-gray-500
             file:mr-4 file:py-2 file:px-4
             file:rounded-full file:border-0
             file:text-sm file:font-semibold
@@ -67,12 +85,12 @@ export default function Home() {
               type="text"
               placeholder="Pesquisar no arquivo..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {setSearchTerm(e.target.value); debouncedSearch(e.target.value);}}
               className="w-full p-2 mb-4 border rounded-lg text-black"
             />
             <h2 className="text-xl font-semibold mb-2">Conteúdo do arquivo:</h2>
             <pre className="bg-black text p-4 rounded-lg whitespace-pre-wrap font-mono max-w-5xl">
-              {getFilteredContent()}
+              {getFilteredContent}
             </pre>
           </div>
         )}
