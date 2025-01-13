@@ -8,7 +8,6 @@ export default function Document() {
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-        <meta name="theme-color" content="#000000" />
         <title>Acervo Receitas</title>
       </Head>
       <body className="antialiased">
