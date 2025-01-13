@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { useCallback, useMemo, useState } from "react";
 import { debounce } from 'lodash';
+import { Analytics } from "@vercel/analytics/react"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,6 +63,7 @@ export default function Home() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} align-middle`}>
+      <Analytics/>
       <div>
         <h1 className="text-2xl font-bold mb-4 mt-8 text-center">Acervo</h1>
       </div>
